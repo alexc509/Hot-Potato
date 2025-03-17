@@ -9,10 +9,18 @@ int main(void) {
 
 	typedef enum GameScreen { GAMEPLAY, ENDING } GameScreen;
 
-	Texture2D potatoSprite = LoadTexture("sprites/potato.png");
+	Texture2D potatoSprite = LoadTexture("resources/potato.png");
+	Texture2D ExplosionEndScreen = LoadTexture("resources/explosion.png");
+
+	InitAudioDevice();
+	bool soundPlayed = false;
+
+	Sound explosionSound  = LoadSound("resources/explosion.mp3");
+
 	Vector2 player1Pos = { 100, screenWidth / 2 };
 	Vector2 player2Pos = { 700, screenWidth / 2 };
-	float playerSpeed = 5;
+	float player1Speed = 5;
+	float player2Speed = 5;
 	float playerSize = 20;
 	bool player1HasPotato = true;
 	bool player2HasPotato = false;
@@ -36,20 +44,29 @@ int main(void) {
 					currentScreen = ENDING;
 				}
 
-				if (IsKeyDown(KEY_D)) player1Pos.x += playerSpeed;
-				if (IsKeyDown(KEY_A)) player1Pos.x -= playerSpeed;
-				if (IsKeyDown(KEY_W)) player1Pos.y -= playerSpeed;
-				if (IsKeyDown(KEY_S)) player1Pos.y += playerSpeed;
+				if (player1HasPotato) {
+					player1Speed = 6;
+					player2Speed = 5;
+				}
+				else {
+					player2Speed = 6;
+					player1Speed = 5;
+				}
+
+				if (IsKeyDown(KEY_D)) player1Pos.x += player1Speed;
+				if (IsKeyDown(KEY_A)) player1Pos.x -= player1Speed;
+				if (IsKeyDown(KEY_W)) player1Pos.y -= player1Speed;
+				if (IsKeyDown(KEY_S)) player1Pos.y += player1Speed;
 
 				if (player1Pos.x < 0) player1Pos.x = 0;
 				if (player1Pos.x > screenWidth - playerSize) player1Pos.x = screenWidth - playerSize;
 				if (player1Pos.y < 0) player1Pos.y = 0;
 				if (player1Pos.y > screenHeight - playerSize) player1Pos.y = screenHeight - playerSize;
 
-				if (IsKeyDown(KEY_RIGHT)) player2Pos.x += playerSpeed;
-				if (IsKeyDown(KEY_LEFT)) player2Pos.x -= playerSpeed;
-				if (IsKeyDown(KEY_UP)) player2Pos.y -= playerSpeed;
-				if (IsKeyDown(KEY_DOWN)) player2Pos.y += playerSpeed;
+				if (IsKeyDown(KEY_RIGHT)) player2Pos.x += player2Speed;
+				if (IsKeyDown(KEY_LEFT)) player2Pos.x -= player2Speed;
+				if (IsKeyDown(KEY_UP)) player2Pos.y -= player2Speed;
+				if (IsKeyDown(KEY_DOWN)) player2Pos.y += player2Speed;
 
 				if (player2Pos.x < 0) player2Pos.x = 0;
 				if (player2Pos.x > screenWidth - playerSize) player2Pos.x = screenWidth - playerSize;
@@ -87,21 +104,27 @@ int main(void) {
 			}	break;
 			case ENDING: 
 			{
+				if (!soundPlayed) PlaySound(explosionSound);
+				soundPlayed = true;
 				BeginDrawing();
-				ClearBackground(BLACK);
-				if (player1HasPotato) {
-					DrawText("Player 2 Wins", 275, 20, 40, RED);
-				}
-				else {
-					DrawText("Player 1 Wins", 275, 20, 40, BLUE);
-				}
+					ClearBackground(RAYWHITE);
+					DrawTexture(ExplosionEndScreen, 0, 0, WHITE);
+					if (player1HasPotato) {
+						DrawText("Player 2 Wins", 275, 10, 40, RED);
+					}
+					else {
+						DrawText("Player 1 Wins", 275, 10, 40, BLUE);
+					}
 				EndDrawing();
 			} break;
 
 		}
 
 	}
+	UnloadSound(explosionSound);
+	CloseAudioDevice();
 
 	CloseWindow();
+
 	return 0;
 }
