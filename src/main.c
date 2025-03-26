@@ -1,7 +1,11 @@
 #include "raylib.h"
 #include <stdio.h>
+#include <time.h>
 
 int main(void) {
+
+	srand(time(NULL));
+
 	const int screenWidth = 800;
 	const int screenHeight = 450;
 
@@ -11,8 +15,10 @@ int main(void) {
 
 	Texture2D potatoSprite = LoadTexture("resources/potato.png");
 	Texture2D ExplosionEndScreen = LoadTexture("resources/explosion.png");
+	Texture2D portalSprite = LoadTexture("resources/portal.png");
 
 	InitAudioDevice();
+
 	bool soundPlayed = false;
 
 	Sound explosionSound  = LoadSound("resources/explosion.mp3");
@@ -25,6 +31,16 @@ int main(void) {
 	bool player1HasPotato = true;
 	bool player2HasPotato = false;
 	float PotatoExplosionTime = 15.0f;
+	float portalRespawnTime = 10.0f;
+
+	
+	float lastPortalSpawnTime = 0.0f;
+	Rectangle portal1 = { 0, 0, 20, 30 };
+	portal1.x = rand() % screenWidth;
+	portal1.y = rand() % screenHeight;
+	Rectangle portal2 = { 0, 0, 20, 30 };
+	portal2.x = rand() % screenWidth;
+	portal2.y = rand() % screenHeight;
 
 	float lastCollisionTime = 0.0f;
 	SetTargetFPS(60);
@@ -34,9 +50,12 @@ int main(void) {
 	while (!WindowShouldClose()) {
 
 		switch (currentScreen) {
+
 			case GAMEPLAY:
 			{
 				float PotatoTimer = (PotatoExplosionTime - GetTime()) + lastCollisionTime;
+				float portalTimer = (portalRespawnTime - GetTime()) + lastPortalSpawnTime;
+
 				char sPotatoTimer[50];
 				gcvt(PotatoTimer, 3, sPotatoTimer);
 
@@ -82,23 +101,70 @@ int main(void) {
 						player2HasPotato = !player2HasPotato;
 					}
 				}
+
+				if (CheckCollisionRecs((Rectangle) { player1Pos.x, player1Pos.y, 20, 20 }, (Rectangle) { portal1.x, portal1.y, 20, 30 })) {
+					player1Pos.x = portal2.x;
+					player1Pos.y = portal2.y;
+					portal1.x = -999;
+					portal1.y = -999;
+					portal2.x = -999;
+					portal2.y = -999;
+				}
+				if (CheckCollisionRecs((Rectangle) { player1Pos.x, player1Pos.y, 20, 20 }, (Rectangle) { portal2.x, portal2.y, 20, 30 })) {
+					player1Pos.x = portal1.x;
+					player1Pos.y = portal1.y;
+					portal1.x = -999;
+					portal1.y = -999;
+					portal2.x = -999;
+					portal2.y = -999;
+				}
+
+				if (CheckCollisionRecs((Rectangle) { player2Pos.x, player2Pos.y, 20, 20 }, (Rectangle) { portal1.x, portal1.y, 20, 30 })) {
+					player2Pos.x = portal2.x;
+					player2Pos.y = portal2.y;
+					portal1.x = -999;
+					portal1.y = -999;
+					portal2.x = -999;
+					portal2.y = -999;
+				}
+				if (CheckCollisionRecs((Rectangle) { player2Pos.x, player2Pos.y, 20, 20 }, (Rectangle) { portal2.x, portal2.y, 20, 30 })) {
+					player2Pos.x = portal1.x;
+					player2Pos.y = portal1.y;
+					portal1.x = -999;
+					portal1.y = -999;
+					portal2.x = -999;
+					portal2.y = -999;
+				}
+
+				if (portalTimer <= 0) {
+					portal1.x = rand() % screenWidth;
+					portal1.y = rand() % screenHeight;
+					portal2.x = rand() % screenWidth;
+					portal2.y = rand() % screenHeight;
+					portalTimer = portalRespawnTime;
+					lastPortalSpawnTime = GetTime();
+				}
+
 				BeginDrawing();
 
 				ClearBackground(RAYWHITE);
 
-				DrawText("big chungus", 130, 200, 100, LIGHTGRAY);
+					DrawText("big chungus", 130, 200, 100, LIGHTGRAY);
 
-				DrawRectangle(player1Pos.x, player1Pos.y, playerSize, playerSize, BLUE);
-				DrawRectangle(player2Pos.x, player2Pos.y, playerSize, playerSize, RED);
+					DrawRectangle(player1Pos.x, player1Pos.y, playerSize, playerSize, BLUE);
+					DrawRectangle(player2Pos.x, player2Pos.y, playerSize, playerSize, RED);
 
-				DrawText((sPotatoTimer), 350, 30, 30, BLACK);
+					DrawText((sPotatoTimer), 350, 30, 30, BLACK);
 
-				if (player1HasPotato) {
-					DrawTexture(potatoSprite, player1Pos.x - 5, player1Pos.y - 30, WHITE);
-				}
-				else {
-					DrawTexture(potatoSprite, player2Pos.x - 5, player2Pos.y - 30, WHITE);
-				}
+					if (player1HasPotato) {
+						DrawTexture(potatoSprite, player1Pos.x - 5, player1Pos.y - 30, WHITE);
+					}
+					else {
+						DrawTexture(potatoSprite, player2Pos.x - 5, player2Pos.y - 30, WHITE);
+					}
+
+					DrawTexture(portalSprite, portal1.x, portal1.y, WHITE);
+					DrawTexture(portalSprite, portal2.x, portal2.y, WHITE);
 
 				EndDrawing();
 			}	break;
