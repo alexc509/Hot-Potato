@@ -18,7 +18,7 @@ int main(void) {
 	Texture2D potatoSprite = LoadTexture("resources/potato.png");
 	Texture2D ExplosionEndScreen = LoadTexture("resources/explosion.png");
 	Texture2D portalSprite = LoadTexture("resources/portal.png");
-
+	Texture2D dashMeterSprite = LoadTexture("resources/dash_meter.png");
 	InitAudioDevice();
 
 	bool soundPlayed = false;
@@ -56,6 +56,9 @@ int main(void) {
 	char lastPressedMoveKeyPlayer2[50];
 
 	float lastCollisionTime = 0.0f;
+	int player1dashmeterIndex = 7;
+	int player2dashmeterIndex = 7;
+
 	SetTargetFPS(60);
 
 	GameScreen currentScreen = GAMEPLAY;
@@ -66,7 +69,7 @@ int main(void) {
 
 			case GAMEPLAY:
 			{
-				printf("Player 1 Dash Cooldown: %f\nPlayer 2 Dash Cooldown: %f\n\n", player1dashCooldown, player2dashCooldown);
+				//printf("Player 1 Dash Cooldown: %f\nPlayer 2 Dash Cooldown: %f\n\n", player1dashCooldown, player2dashCooldown);
 				float PotatoTimer = (PotatoExplosionTime - GetTime()) + lastCollisionTime;
 				float portalTimer = (portalRespawnTime - GetTime()) + lastPortalSpawnTime;
 				player1dashCooldown = dashDelayTime - (GetTime() - player1lastDashTime);
@@ -222,6 +225,63 @@ int main(void) {
 					lastPortalSpawnTime = GetTime();
 				}
 
+
+				if (player1dashCooldown <= 8 && player1dashCooldown > 7) {
+					player1dashmeterIndex = 7;
+				}
+				else if (player1dashCooldown <= 7 && player1dashCooldown > 6) {
+					player1dashmeterIndex = 7;
+				}
+				else if (player1dashCooldown <= 6 && player1dashCooldown > 5) {
+					player1dashmeterIndex = 6;
+				}
+				else if (player1dashCooldown <= 5 && player1dashCooldown > 4) {
+					player1dashmeterIndex = 5;
+				}
+				else if (player1dashCooldown <= 4 && player1dashCooldown > 3) {
+					player1dashmeterIndex = 4;
+				}
+				else if (player1dashCooldown <= 3 && player1dashCooldown > 2) {
+					player1dashmeterIndex = 3;
+				}
+				else if (player1dashCooldown <= 2 && player1dashCooldown > 1) {
+					player1dashmeterIndex = 2;
+				}
+				else if (player1dashCooldown <= 1 && player1dashCooldown > 0) {
+					player1dashmeterIndex = 1;
+				}
+				else if (player1dashCooldown <= 0){
+					player1dashmeterIndex = 0;
+				}
+
+
+				if (player2dashCooldown <= 8 && player2dashCooldown > 7) {
+					player2dashmeterIndex = 7;
+				}
+				else if (player2dashCooldown <= 7 && player2dashCooldown > 6) {
+					player2dashmeterIndex = 7;
+				}
+				else if (player2dashCooldown <= 6 && player2dashCooldown > 5) {
+					player2dashmeterIndex = 6;
+				}
+				else if (player2dashCooldown <= 5 && player2dashCooldown > 4) {
+					player2dashmeterIndex = 5;
+				}
+				else if (player2dashCooldown <= 4 && player2dashCooldown > 3) {
+					player2dashmeterIndex = 4;
+				}
+				else if (player2dashCooldown <= 3 && player2dashCooldown > 2) {
+					player2dashmeterIndex = 3;
+				}
+				else if (player2dashCooldown <= 2 && player2dashCooldown > 1) {
+					player2dashmeterIndex = 2;
+				}
+				else if (player2dashCooldown <= 1 && player2dashCooldown > 0) {
+					player2dashmeterIndex = 1;
+				}
+				else if (player2dashCooldown <= 0) {
+					player2dashmeterIndex = 0;
+				}
 				BeginDrawing();
 
 				ClearBackground(RAYWHITE);
@@ -241,9 +301,18 @@ int main(void) {
 					else {
 						DrawTexture(potatoSprite, player2Pos.x - 5, player2Pos.y - 30, WHITE);
 					}
-
+					
+					
 					DrawTexture(portalSprite, portal1.x, portal1.y, WHITE);
 					DrawTexture(portalSprite, portal2.x, portal2.y, WHITE);
+
+					Rectangle player1dashmeterSource = (Rectangle){ 0+player1dashmeterIndex*48, 0, 48, 32 };
+					Rectangle player1dashmeterDest = (Rectangle){ 30, screenHeight-80 , player1dashmeterSource.width*2, player1dashmeterSource.height*2 };
+					DrawTexturePro(dashMeterSprite, player1dashmeterSource, player1dashmeterDest, (Vector2) { 0, 0 }, 0, WHITE);
+
+					Rectangle player2dashmeterSource = (Rectangle){ 0 + player2dashmeterIndex * 48, 0, 48, 32 };
+					Rectangle player2dashmeterDest = (Rectangle){ screenWidth-120, screenHeight - 80 , player2dashmeterSource.width * 2, player2dashmeterSource.height * 2 };
+					DrawTexturePro(dashMeterSprite, player2dashmeterSource, player2dashmeterDest, (Vector2) { 0, 0 }, 0, WHITE);
 
 				EndDrawing();
 			}	break;
